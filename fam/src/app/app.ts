@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { VideoCallComponent } from './components/video-call/video-call.component';
 
 @Component({
-  imports: [RouterModule],
+  imports: [RouterModule, VideoCallComponent],
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: './app.css',

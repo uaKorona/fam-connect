@@ -15,16 +15,14 @@ const app = express();
 const angularApp = new AngularNodeAppEngine();
 
 /**
- * Example Express Rest API endpoints can be defined here.
- * Uncomment and define endpoints as necessary.
- *
- * Example:
- * ```ts
- * app.get('/api/**', (req, res) => {
- *   // Handle API request
- * });
- * ```
+ * API роути для відеочату
  */
+// Підтримка JSON для API роутів
+app.use(express.json());
+
+// Підключаємо роути для роботи з кімнатою
+const roomRoutes = require('../../server/routes/room.routes');
+app.use('/api/room', roomRoutes);
 
 /**
  * Serve static files from /browser
