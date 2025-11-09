@@ -6,8 +6,8 @@ services:
     name: fam-connect
     env: node
     plan: free
-    buildCommand: npm ci && npm run build
-    startCommand: node dist/fam/server/server.mjs
+    buildCommand: cd fam && npm ci && npm run build
+    startCommand: cd fam && node dist/fam/server/server.mjs
     envVars:
       - key: NODE_ENV
         value: production
@@ -16,10 +16,6 @@ services:
       - key: RENDER
         value: true
     healthCheckPath: /api/room/status
-    disk:
-      name: fam-connect-disk
-      mountPath: /opt/render/project/src/data
-      sizeGB: 1
 # Додаткові налаштування
 # Auto-deploy: Включено (деплой при push до main гілки)
 # Domain: Автоматично згенерований .onrender.com домен

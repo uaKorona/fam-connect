@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
-import { roomManager } from '../services/room-manager.service.js';
-import { generateUserId } from '../utils/user.utils.js';
+import { roomManager } from '../services/room-manager.service';
+import { generateUserId } from '../utils/user.utils';
 
 export const roomRoutes = Router();
 
