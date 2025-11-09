@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WebRTCService, ConnectionState } from '../../services/webrtc.service';
+import { HostingService } from '../../services/hosting/hosting.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -19,6 +20,7 @@ import { Subscription } from 'rxjs';
 })
 export class VideoCallComponent implements OnInit, OnDestroy {
   private webrtcService = inject(WebRTCService);
+  private hostingService = inject(HostingService);
 
   @ViewChild('localVideo', { static: true })
   localVideoRef!: ElementRef<HTMLVideoElement>;
@@ -35,6 +37,9 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   readonly ConnectionState = ConnectionState;
 
   ngOnInit(): void {
+    // Ініціалізація hosting сервісу
+    this.hostingService.initialize();
+
     // Підписка на зміни стану з'єднання
     this.stateSubscription = this.webrtcService
       .getConnectionState()
@@ -42,6 +47,7 @@ export class VideoCallComponent implements OnInit, OnDestroy {
         this.currentState = state;
         this.updateStatusMessage();
         this.updateVideoStreams();
+        this.handleHostingKeepAlive(state);
       });
   }
 
@@ -53,6 +59,8 @@ export class VideoCallComponent implements OnInit, OnDestroy {
     if (this.isCallActive) {
       this.endCall();
     }
+    // Зупиняємо keep-alive при знищенні компонента
+    this.hostingService.stopCallKeepAlive();
   }
 
   // Початок відеодзвінка
@@ -74,9 +82,13 @@ export class VideoCallComponent implements OnInit, OnDestroy {
       await this.webrtcService.endCall();
       this.isCallActive = false;
       this.clearVideoElements();
+      // Зупиняємо keep-alive після завершення дзвінка
+      this.hostingService.stopCallKeepAlive();
     } catch (error) {
       console.error('Error ending call:', error);
       this.isCallActive = false;
+      // Все одно зупиняємо keep-alive при помилці
+      this.hostingService.stopCallKeepAlive();
     }
   }
 
@@ -155,5 +167,43 @@ export class VideoCallComponent implements OnInit, OnDestroy {
   // Перевірка чи є помилка
   hasError(): boolean {
     return this.currentState === ConnectionState.ERROR;
+  }
+
+  /**
+   * Управляє keep-alive механізмом на основі стану з'єднання
+   */
+  private handleHostingKeepAlive(state: ConnectionState): void {
+    switch (state) {
+      case ConnectionState.CONNECTING:
+      case ConnectionState.WAITING:
+        // Запускаємо keep-alive при початку процесу з'єднання
+        this.hostingService.startCallKeepAlive();
+        break;
+      case ConnectionState.CONNECTED:
+        // Продовжуємо keep-alive під час активного дзвінка
+        if (!this.hostingService.isKeepAliveActive()) {
+          this.hostingService.startCallKeepAlive();
+        }
+        break;
+      case ConnectionState.DISCONNECTED:
+      case ConnectionState.ERROR:
+        // Зупиняємо keep-alive при відключенні або помилці
+        this.hostingService.stopCallKeepAlive();
+        break;
+    }
+  }
+
+  /**
+   * Повертає назву поточного hosting провайдера для відображення в UI
+   */
+  getHostingProviderName(): string {
+    return this.hostingService.getCurrentProviderName();
+  }
+
+  /**
+   * Перевіряє чи активний keep-alive механізм
+   */
+  isKeepAliveActive(): boolean {
+    return this.hostingService.isKeepAliveActive();
   }
 }

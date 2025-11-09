@@ -7,6 +7,7 @@ import {
 import express from 'express';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { roomRoutes } from './server/routes/room.routes.js';
 
 const serverDistFolder = dirname(fileURLToPath(import.meta.url));
 const browserDistFolder = resolve(serverDistFolder, '../browser');
@@ -21,7 +22,6 @@ const angularApp = new AngularNodeAppEngine();
 app.use(express.json());
 
 // Підключаємо роути для роботи з кімнатою
-const roomRoutes = require('../../server/routes/room.routes');
 app.use('/api/room', roomRoutes);
 
 /**

@@ -1,0 +1,26 @@
+# Render конфігурація для фам-зв'язок додатку
+# https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: fam-connect
+    env: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/fam/server/server.mjs
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      - key: RENDER
+        value: true
+    healthCheckPath: /api/room/status
+    disk:
+      name: fam-connect-disk
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1
+# Додаткові налаштування
+# Auto-deploy: Включено (деплой при push до main гілки)
+# Domain: Автоматично згенерований .onrender.com домен
+# SSL: Автоматично увімкнений
