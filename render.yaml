@@ -6,7 +6,7 @@ services:
     name: fam-connect
     env: node
     plan: free
-    buildCommand: cd fam && npm ci && npm run build
+    buildCommand: cd fam && npm ci --include=dev && npm run build
     startCommand: cd fam && node dist/fam/server/server.mjs
     envVars:
       - key: NODE_ENV
